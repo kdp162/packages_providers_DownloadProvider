@@ -436,8 +436,9 @@ public class DownloadNotifier {
                     if (!TextUtils.isEmpty(description)) {
                         builder.setContentText(description);
                     }
+                        builder.setSubText(subtext);
                   }
-                    builder.setSubText(subtext);
+
                 } else if (type == TYPE_WAITING) {
                     builder.setContentText(
                             res.getString(R.string.notification_need_wifi_for_size));
@@ -463,9 +464,21 @@ public class DownloadNotifier {
                 }
 
                 if (type == TYPE_ACTIVE) {
-                    builder.setContentTitle(res.getQuantityString(
-                            R.plurals.notif_summary_active, cluster.size(), cluster.size()));
-                    builder.setSubText(subtext);
+                    if (isClusterPaused) {
+                        builder.setContentTitle(res.getString(R.string.download_paused));
+                    } else if (numPaused > 0) {
+                        StringBuilder sb = new StringBuilder(res.getQuantityString(
+                                R.plurals.notif_summary_active,
+                                cluster.size() - numPaused, cluster.size()));
+                        sb.append(", ");
+                        sb.append(res.getString(R.string.notif_summary_paused, numPaused));
+                        builder.setContentTitle(sb.toString());
+                    } else {
+                        builder.setContentTitle(res.getQuantityString(
+                                R.plurals.notif_summary_active, cluster.size(), cluster.size()));
+                        builder.setSubText(subtext);
+                    }
+
                 } else if (type == TYPE_WAITING) {
                     builder.setContentTitle(res.getQuantityString(
                             R.plurals.notif_summary_waiting, cluster.size(), cluster.size()));
